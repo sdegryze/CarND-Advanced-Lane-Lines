@@ -54,14 +54,17 @@ In addition, in code cell 11, I create a movie of the binary thresholded images 
 The code for my perspective transform is located in cell 12. The code for the points I selected are copied below.
 
 ```python
-src = np.array([[220,  self.img_size[1] - 20],
-                [1100, self.img_size[1] - 20],
-                [740,  self.img_size[1] // 1.75 + 70],
-                [548,  self.img_size[1] // 1.75 + 70]], np.float32)
-dst = np.array([[390,  self.img_size[1] - 20],
-                [925,  self.img_size[1] - 20],
-                [925,  self.img_size[1] // 1.75 + 70],
-                [390,  self.img_size[1] // 1.75 + 70]], np.float32)
+img_X = self.img_size[0]
+img_Y = self.img_size[1]
+offset = 100
+src = np.float32([[((img_X / 2) - offset, img_Y / 2 + offset)],
+                  [(offset, img_Y)],
+                  [(img_X - offset, img_Y)],
+                  [((img_X / 2) + offset, img_Y / 2 + offset)]])
+dst = np.float32([[offset, 0],
+                  [offset * 2.5, img_Y],
+                  [img_X - offset * 2.5, img_Y],
+                  [img_X - offset, 0]])
 ```
 
 
@@ -70,12 +73,12 @@ This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 220, 700      | 390, 700        | 
-| 1100, 700      | 925, 700      |
-| 740, 481     | 925, 481      |
-| 548, 481      | 390, 481        |
-
-The following figure shows these points on one of the test images:
+| 540, 460      | 100, 0        | 
+| 100, 720      | 250, 720      |
+| 1180, 720    | 1030, 720      |
+| 740, 460      | 1180, 0        |
+ 
+The following figure shows these points on one of the test images (source points in green; destination points in red):
 ![Points used to calculate perspective.](./report_images/perspective_points.png)
  
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image (code cell 13).
@@ -95,13 +98,13 @@ One can see in the right image that the polynomial fit is not always good. This 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-In perspective corrected space, the lanes are about 520 pixels wide (see calculation in cell 16). Therefore, there are 3.7/520 m/pixels in the x direction. Likewise, there are about 30/500 m/pixels in the y direction.
+In perspective corrected space, the lanes are about 660 pixels wide (see calculation in cell 16). Therefore, there are 3.7/660 m/pixels in the x direction. Likewise, there are about 30/700 m/pixels in the y direction.
 
 I calculated the offset by assuming the camera is placed at the center of your dashboard, so that the center of the image is the position of the camera (and hence that of the car).
 
 The center of the lane is the middle of the two predicted lane lines at the y position closest to the car. The offset can then be calculated by taking the difference between the position of the camera and the position of the middle of the lanes.
 
-The actual calculation of the curvature is done in the `detect_lanes` function of the `LaneFinder` class (cell 14). I found values of curvature around 500 - 900m and offsets of 0.3 - 0.5m.
+The actual calculation of the curvature is done in the `detect_lanes` function of the `LaneFinder` class (cell 14). I found values of curvature around 800 - 1200m and offsets of 0.3 - 0.5m, mostly to the left.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
